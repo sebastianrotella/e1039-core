@@ -79,7 +79,7 @@ int SQPileupGen::InitRun(PHCompositeNode* topNode)
       PHCompositeNode* dstNode = dynamic_cast<PHCompositeNode*>(iter.findFirst("PHCompositeNode", "DST"));
       
       _ineve = new PHG4InEvent();
-      dstNode->addNode(new PHDataNode<PHObject>(_ineve, "PHG4INEVENT", "PHObject"));
+      dstNode->addNode(new PHIODataNode<PHObject>(_ineve, "PHG4INEVENT", "PHObject"));
     }
 
   _evt = findNode::getClass<SQEvent>(topNode, "SQEvent");
@@ -177,6 +177,7 @@ int SQPileupGen::process_event(PHCompositeNode* topNode)
   _evt->set_run_id(0);
   _evt->set_spill_id(0);
   _evt->set_event_id(_n_proc_evt);
+  _evt->set_qie_rf_intensity(0, QIEcount);
   return Fun4AllReturnCodes::EVENT_OK; 
 }
 
