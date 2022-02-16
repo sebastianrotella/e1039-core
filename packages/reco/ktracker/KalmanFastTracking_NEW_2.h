@@ -289,7 +289,7 @@ private:
 
     //Timer
     std::map<std::string, PHTimer*> _timers;
-
+  /*
   double m_slopeComparison = 0.15;
   double m_windowSize = 20.;
 
@@ -300,7 +300,18 @@ private:
   double m_windowSizeTight = 7.;
 
   double m_slopeComparisonSt1 = 0.30;
+  */ //WPM Feb 16
+
+  double m_slopeComparison = 0.3;
+  double m_windowSize = 40.;
+
+  double m_slopeComparisonMedium = 0.07;
+  double m_windowSizeMedium = 11.;
   
+  double m_slopeComparisonTight = 0.04;
+  double m_windowSizeTight = 7.;
+
+  double m_slopeComparisonSt1 = 0.30;
 };
 
 #endif

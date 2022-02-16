@@ -32,6 +32,7 @@ Created: 05-28-2013
 //#define _DEBUG_RES_EMBED
 
 //#define _DEBUG_FAST
+#define _DEBUG_HODO
 
 namespace 
 {
@@ -287,7 +288,8 @@ KalmanFastTracking_NEW_2::KalmanFastTracking_NEW_2(const PHField* field, const T
         }
     }
 
-#ifdef _DEBUG_ON
+    //#ifdef _DEBUG_ON
+#ifdef _DEBUG_HODO
     cout << "========================" << endl;
     cout << "Hodo. masking settings: " << endl;
     for(int i = 0; i < 4; i++)
@@ -471,7 +473,9 @@ int KalmanFastTracking_NEW_2::setRawEvent(SRawEvent* event_input)
     rawEvent = event_input;
     if(!acceptEvent(rawEvent)) return TFEXIT_FAIL_MULTIPLICITY;
     hitAll = event_input->getAllHits();
-#ifdef _DEBUG_ON
+    
+    //#ifdef _DEBUG_ON
+#ifdef _DEBUG_HODO
     for(std::vector<Hit>::iterator iter = hitAll.begin(); iter != hitAll.end(); ++iter) iter->print();
 #endif
 
@@ -480,6 +484,8 @@ int KalmanFastTracking_NEW_2::setRawEvent(SRawEvent* event_input)
     {
         //std::cout << "For station " << i << std::endl;
         hitIDs_mask[i].clear();
+	hitIDs_mask[i] = rawEvent->getHitsIndexInDetectors(detectorIDs_mask[i]); //WPM Feb 16
+	/* //WPM Feb 16
         if(MC_MODE || COSMIC_MODE || rawEvent->isFPGATriggered())
         {
             hitIDs_mask[i] = rawEvent->getHitsIndexInDetectors(detectorIDs_maskX[i]);
@@ -488,7 +494,7 @@ int KalmanFastTracking_NEW_2::setRawEvent(SRawEvent* event_input)
         {
             hitIDs_mask[i] = rawEvent->getHitsIndexInDetectors(detectorIDs_maskY[i]);
         }
-
+	*/
         //for(std::list<int>::iterator iter = hitIDs_mask[i].begin(); iter != hitIDs_mask[i].end(); ++iter) std::cout << *iter << " " << hitAll[*iter].detectorID << " === ";
         //std::cout << std::endl;
     }
@@ -702,7 +708,8 @@ int KalmanFastTracking_NEW_2::setRawEvent(SRawEvent* event_input)
     _timers["global"]->stop();
     if(verbosity >= 2) LogInfo("NTracklets Global: " << trackletsInSt[4].size());
     
-#ifdef _DEBUG_ON
+    //#ifdef _DEBUG_ON
+#ifdef _DEBUG_HODO
     for(int i = 0; i < 2; ++i)
     {
         std::cout << "=======================================================================================" << std::endl;
@@ -1025,6 +1032,33 @@ void KalmanFastTracking_NEW_2::buildBackPartialTracksSlimX(int pass, double slop
 	    tracklet3->print();
 	  }
 #endif
+
+
+#ifdef _DEBUG_HODO
+	  LogInfo("print tracklet 2");
+	  tracklet2->print();
+
+	  LogInfo("tracklet2->stationID-1 = "<< tracklet2->stationID-1);
+	  for(std::vector<int>::iterator stationID = stationIDs_mask[tracklet2->stationID-1].begin(); stationID != stationIDs_mask[tracklet2->stationID-1].end(); ++stationID){
+	    LogInfo("*stationID-1 = "<<*stationID-1);
+	    for(std::list<int>::iterator iter = hitIDs_mask[*stationID-1].begin(); iter != hitIDs_mask[*stationID-1].end(); ++iter){
+	      int detectorID = hitAll[*iter].detectorID;
+	      int elementID = hitAll[*iter].elementID;
+	      
+	      int idx1 = detectorID - nChamberPlanes - 1;
+	      int idx2 = elementID - 1;
+	      
+	      LogInfo(*iter);
+	      hitAll[*iter].print();
+	      //LogInfo(nHodoHits << "/" << stationIDs_mask[tracklet.stationID-1].size() << ":  " << z_hodo << "  " << x_hodo << " +/- " << err_x << "  " << y_hodo << " +/-" << err_y << " : " << x_min << "  " << x_max << "  " << y_min << "  " << y_max);
+
+	    }
+	  }
+#endif
+
+
+
+	  
 	  
 	  Tracklet tracklet_23;
 	  if(OLD_TRACKING){
@@ -1416,9 +1450,9 @@ void KalmanFastTracking_NEW_2::buildGlobalTracksDisplaced()
 		double testSt1Vpos = p_geomSvc->getCostheta(5) * ( expXZSlope * (z_plane[5] - z_plane[3]) + pos_exp[0]) + p_geomSvc->getSintheta(5) * (tracklet23->ty * z_plane[5] + tracklet23->y0);
 		pos_exp[1] = testSt1Upos;
 		pos_exp[2] = testSt1Vpos;
-		window[0] = 1.25;
-		window[1] = 1.5;
-		window[2] = 1.5;
+		window[0] = 1.5; //WPM Feb 16 was 1.25
+		window[1] = 3.5; //WPM Feb 16 was 1.5
+		window[2] = 3.5; //WPM Feb 16 was 1.5
 		buildTrackletsInStationSlim(i+1, 0, pos_exp, window);
 		buildTrackletsInStationSlimU(i+1, 0, pos_exp, window);
 		buildTrackletsInStationSlimV(i+1, 0, pos_exp, window);
