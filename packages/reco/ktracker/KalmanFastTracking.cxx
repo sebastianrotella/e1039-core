@@ -800,7 +800,8 @@ void KalmanFastTracking::buildGlobalTracks()
             _timers["global_st1"]->stop();
 
             _timers["global_link"]->restart();
-            Tracklet tracklet_best_prob, tracklet_best_vtx;
+            //Tracklet tracklet_best_prob, tracklet_best_vtx;
+            Tracklet tracklet_best_prob;
             for(std::list<Tracklet>::iterator tracklet1 = trackletsInSt[0].begin(); tracklet1 != trackletsInSt[0].end(); ++tracklet1)
             {
 #ifdef _DEBUG_ON
@@ -846,6 +847,7 @@ void KalmanFastTracking::buildGlobalTracks()
 
                 ///Set vertex information - only applied when KF is enabled
                 ///TODO: maybe in the future add a Genfit-based equivalent here, for now leave as is
+
                 if(enable_KF && !TRACK_DISPLACED)
                 {
                     _timers["global_kalman"]->restart();
@@ -870,9 +872,8 @@ void KalmanFastTracking::buildGlobalTracks()
                 {
                     LogInfo("Current best by vtx:");
                     tracklet_best_vtx.print();
-
                     LogInfo("Comparison II: " << (tracklet_global.chisq_vtx < tracklet_best_vtx.chisq_vtx));
-                    //LogInfo("Quality II   : " << recTrack.isValid());
+                    LogInfo("Quality II   : " << recTrack.isValid());
                 }
 #endif
             }
