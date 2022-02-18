@@ -3,6 +3,7 @@
 #include "KalmanFastTracking.h"
 #include "KalmanFastTracking_NEW.h"
 #include "KalmanFastTracking_NEW_2.h"
+#include "KalmanFastTracking_NEW_HODO.h"
 #include "EventReducer.h"
 #include "UtilSRawEvent.h"
 
@@ -118,7 +119,8 @@ int SQReco::InitRun(PHCompositeNode* topNode)
   //Init track finding
   //_fastfinder = new KalmanFastTracking(_phfield, _t_geo_manager, false);
   //_fastfinder = new KalmanFastTracking_NEW(_phfield, _t_geo_manager, false);
-  _fastfinder = new KalmanFastTracking_NEW_2(_phfield, _t_geo_manager, false);
+  //_fastfinder = new KalmanFastTracking_NEW_2(_phfield, _t_geo_manager, false);
+  _fastfinder = new KalmanFastTracking_NEW_HODO(_phfield, _t_geo_manager, false);
 
   _fastfinder->Verbosity(Verbosity());
 

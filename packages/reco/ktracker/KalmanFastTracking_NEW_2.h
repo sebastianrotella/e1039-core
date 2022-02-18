@@ -221,6 +221,8 @@ private:
     std::vector<int> detectorIDs_maskX[4];
     std::vector<int> detectorIDs_maskY[4];
     std::list<int>   hitIDs_mask[4];              //hits in T/B, L/R are combined
+  std::list<int>   hitIDs_maskX[4];              //hits in T/B, L/R are combined
+  std::list<int>   hitIDs_maskY[4];              //hits in T/B, L/R are combined
     std::vector<int> detectorIDs_muidHodoAid[2];  //Aux-hodoscope masking for muon ID
 
     //register difference hodo masking stations for different chamber detectors
@@ -302,8 +304,8 @@ private:
   double m_slopeComparisonSt1 = 0.30;
   */ //WPM Feb 16
 
-  double m_slopeComparison = 0.3;
-  double m_windowSize = 40.;
+  double m_slopeComparison = 0.4;
+  double m_windowSize = 50.;
 
   double m_slopeComparisonMedium = 0.07;
   double m_windowSizeMedium = 11.;
@@ -311,7 +313,7 @@ private:
   double m_slopeComparisonTight = 0.04;
   double m_windowSizeTight = 7.;
 
-  double m_slopeComparisonSt1 = 0.30;
+  double m_slopeComparisonSt1 = 0.40;
 };
 
 #endif
