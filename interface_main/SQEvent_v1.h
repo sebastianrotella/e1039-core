@@ -33,6 +33,9 @@ public:
 	virtual int get_run_id() const {return _run_id;}
 	virtual void set_run_id(const int a) {_run_id = a;}
 
+  virtual double get_totalTime() const {return _totalTime;}
+  virtual void set_totalTime(const double t) {_totalTime = t;}
+  
 	virtual int get_spill_id() const {return _spill_id;}
 	virtual void set_spill_id(const int a) {_spill_id = a;}
 
@@ -54,6 +57,7 @@ public:
 
 	virtual unsigned short get_trigger() const {return _trigger;}
 	virtual void           set_trigger(const unsigned short a) {_trigger = a;}
+
 
 	virtual int get_raw_matrix(const unsigned short i) const {
 		if(i<5) return _raw_matrix[i];
@@ -118,13 +122,16 @@ public:
         virtual short get_n_board_trig_count() const { return _n_board_trig_c; }
 	virtual void  set_n_board_trig_count(const short a) { _n_board_trig_c = a; }
 
-
+  //private:
+  //double _totalTime;
 
 protected:
 	int _run_id;
 	int _spill_id;
 	int _event_id;
 	int _coda_event_id;
+
+  double _totalTime;
 
 	unsigned short _trigger; //< NIM[1-5], MATRIX[1-5]
 

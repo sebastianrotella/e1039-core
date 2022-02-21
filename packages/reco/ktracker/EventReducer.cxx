@@ -78,6 +78,10 @@ EventReducer::~EventReducer()
 
 int EventReducer::reduceEvent(SRawEvent* rawEvent)
 {
+
+  int evID = rawEvent->getEventID()+1; //WPM
+  rndm.SetSeed(evID); //WPM
+  
     int nHits_before = rawEvent->getNChamberHitsAll();
 
     //temporarily disable trigger road masking if this event is not fired by any MATRIX triggers

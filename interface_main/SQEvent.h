@@ -44,6 +44,9 @@ public:
 	virtual int get_run_id() const = 0; ///< Return the run ID.
 	virtual void set_run_id(const int a) = 0;
 
+  virtual double get_totalTime() const = 0;
+  virtual void set_totalTime(const double t) = 0;
+  
 	virtual int get_spill_id() const = 0; ///< Return the spill ID.
 	virtual void set_spill_id(const int a) = 0;
 

@@ -150,6 +150,8 @@ private:
   SQTrackVector* _recTrackVec;
   SQTrackVector* _recSt3TrackletVec;
 
+  double _totalTime;
+  
   bool _use_geom_io_node;
   std::string  _geom_file_name;
   TGeoManager* _t_geo_manager;

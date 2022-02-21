@@ -1,5 +1,5 @@
 /*
-KalmanFastTracking_NEW.h
+KalmanFastTracking_NEW_HODO.h
 
 Fast tracking utility of Kalman filter track, used to improve the tracking speed and also for online monitoring
 
@@ -7,8 +7,8 @@ Author: Kun Liu, liuk@fnal.gov
 Created: 05-24-2013
 */
 
-#ifndef _KALMANFASTTRACKING_NEW_2_H
-#define _KALMANFASTTRACKING_NEW_2_H
+#ifndef _KALMANFASTTRACKING_NEW_HODO_H
+#define _KALMANFASTTRACKING_NEW_HODO_H
 
 #include <GlobalConsts.h>
 #include <geom_svc/GeomSvc.h>
@@ -33,11 +33,11 @@ class TGeoManager;
 class PHField;
 class PHTimer;
 
-class KalmanFastTracking_NEW_2
+class KalmanFastTracking_NEW_HODO
 {
 public:
-    explicit KalmanFastTracking_NEW_2(const PHField* field, const TGeoManager *geom, bool flag = true);
-    ~KalmanFastTracking_NEW_2();
+    explicit KalmanFastTracking_NEW_HODO(const PHField* field, const TGeoManager *geom, bool flag = true);
+    ~KalmanFastTracking_NEW_HODO();
 
     //set/get verbosity
     void Verbosity(const int a) {verbosity = a;}
@@ -130,8 +130,10 @@ public:
     std::list<Tracklet>& getTrackletList(int i) { return trackletsInSt[i]; }
     std::list<SRecTrack>& getSRecTracks() { return stracks; }
     std::list<PropSegment>& getPropSegments(int i) { return propSegs[i]; }
-  
-    ///Set the index of the final output tracklet list
+
+  double getTotalTime(){ return totalTime; }
+
+  ///Set the index of the final output tracklet list
     void setOutputListID(unsigned int i) { outputListIdx = i; }
 
     ///Tool, a simple-minded chi square fit
@@ -153,9 +155,9 @@ private:
   //std::list<Tracklet> trackletsInStSlimV[5];
 
   std::list<Tracklet> trackletsInSt[5];
-  std::list<Tracklet> trackletsInStSlimX[5][200];
-  std::list<Tracklet> trackletsInStSlimU[5][200];
-  std::list<Tracklet> trackletsInStSlimV[5][200];
+  std::list<Tracklet> trackletsInStSlimX[5][50][50];
+  std::list<Tracklet> trackletsInStSlimU[5][50][50];
+  std::list<Tracklet> trackletsInStSlimV[5][50][50];
 
   long int num23XCombos;
   long int num23UCombos;
@@ -165,14 +167,19 @@ private:
     num23XCombos = 0;
     num23UCombos = 0;
     num23VCombos = 0;
-    for(unsigned int b = 0; b < 200; b++){
-      num23XCombos += trackletsInStSlimX[3][b].size();
-      num23UCombos += trackletsInStSlimU[3][b].size();
-      num23VCombos += trackletsInStSlimV[3][b].size();
+    for(unsigned int b = 0; b < 50; b++){
+      for(unsigned int c = 0; c < 50; c++){
+	num23XCombos += trackletsInStSlimX[3][b][c].size();
+	num23UCombos += trackletsInStSlimU[3][b][c].size();
+	num23VCombos += trackletsInStSlimV[3][b][c].size();
+      }
     }
   }
 
   bool isSlimMiddle(){
+    return false;
+  }
+  /*bool isSlimMiddle(){
     int nX = 0;
     int nU = 0;
     int nV = 0;
@@ -188,7 +195,7 @@ private:
     } else{
       return false;
     }
-  }
+  }*/
 
   int num1XCombos;
   int num1UCombos;
@@ -198,11 +205,11 @@ private:
     num1XCombos = 0;
     num1UCombos = 0;
     num1VCombos = 0;
-    for(unsigned int b = 0; b < 200; b++){
-      num1XCombos += trackletsInStSlimX[0][b].size();
-      num1UCombos += trackletsInStSlimU[0][b].size();
-      num1VCombos += trackletsInStSlimV[0][b].size();
-    }
+    //for(unsigned int b = 0; b < 200; b++){
+    num1XCombos = trackletsInStSlimX[0][0][0].size();
+    num1UCombos = trackletsInStSlimU[0][0][0].size();
+    num1VCombos = trackletsInStSlimV[0][0][0].size();
+    //}
   }
   
     //Final SRecTrack list
@@ -304,8 +311,14 @@ private:
   double m_slopeComparisonSt1 = 0.30;
   */ //WPM Feb 16
 
-  double m_slopeComparison = 0.4;
-  double m_windowSize = 50.;
+  //double m_slopeComparison = 0.4;
+  //double m_windowSize = 50.;
+
+  //double m_slopeComparison = 0.5;
+  //double m_windowSize = 55.;
+  
+  //double m_slopeComparison = 0.15;
+  //double m_windowSize = 20.;
 
   double m_slopeComparisonMedium = 0.07;
   double m_windowSizeMedium = 11.;
@@ -313,7 +326,51 @@ private:
   double m_slopeComparisonTight = 0.04;
   double m_windowSizeTight = 7.;
 
+
+
+  /*
+  double m_slopeComparison = 0.5;
+  double m_windowSize = 55.;
+  
   double m_slopeComparisonSt1 = 0.40;
+
+  double m_hodoXWindow = 20;
+  double m_hodoUVWindow = 55;
+
+  double m_hodoXDIFFWindow = 25;
+  double m_hodoUVDIFFWindow = 30;
+
+  double m_XUVSlopeWindowCoarse = 0.06; //was 0.04
+  double m_XUVPosWindowCoarse = 12.; //was 9.
+
+  double m_YSlopesDiff = 0.01; //was 0.007
+  double m_XSlopesDiff = 0.01; //was 0.007
+
+  double m_chiSqCut = 300.;
+  double m_st23ChiSqCut = 50.; //was 15, 20, then 40
+  */
+
+  double m_slopeComparison = 0.5;
+  double m_windowSize = 55.;
+  
+  double m_slopeComparisonSt1 = 0.40;
+
+  double m_hodoXWindow = 20;
+  double m_hodoUVWindow = 55;
+
+  double m_hodoXDIFFWindow = 25;
+  double m_hodoUVDIFFWindow = 30;
+
+  double m_XUVSlopeWindowCoarse = 0.06; //was 0.04
+  double m_XUVPosWindowCoarse = 12.; //was 9.
+
+  double m_YSlopesDiff = 0.01; //was 0.007
+  double m_XSlopesDiff = 0.01; //was 0.007
+
+  double m_chiSqCut = 300.;
+  double m_st23ChiSqCut = 50.; //was 15, 20, then 40
+  
+  double totalTime;
 };
 
 #endif

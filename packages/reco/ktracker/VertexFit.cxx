@@ -276,6 +276,10 @@ int VertexFit::setRecEvent(SRecEvent* recEvent, int sign1, int sign2)
   //Loop over all possible combinations
   for(int i = 0; i < nPos; ++i)
   {
+    if(Verbosity()>Fun4AllBase::VERBOSITY_A_LOT) {
+      LogInfo("pos track print");
+      recEvent->getTrack(idx_pos[i]).print();
+    }
       if(!recEvent->getTrack(idx_pos[i]).isValid()) continue;
       if(Verbosity()>Fun4AllBase::VERBOSITY_A_LOT) {
         LogInfo("pos track OK");
@@ -284,6 +288,11 @@ int VertexFit::setRecEvent(SRecEvent* recEvent, int sign1, int sign2)
       int j = sign1 + sign2 == 0 ? 0 : i + 1;      // this is to avoid using same track twice in like-sign mode
       for(; j < nNeg; ++j)
       {
+	if(Verbosity()>Fun4AllBase::VERBOSITY_A_LOT) {
+	  LogInfo("neg track print");
+	  recEvent->getTrack(idx_pos[i]).print();
+	  LogInfo("and check idx_pos[i] == idx_neg[j]?:"<<idx_pos[i]<<" and "<<idx_neg[j]);
+      }
           //Only needed for like-sign muons
           if(idx_pos[i] == idx_neg[j]) continue;
           if(Verbosity()>Fun4AllBase::VERBOSITY_A_LOT) {

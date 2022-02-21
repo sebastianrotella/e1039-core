@@ -150,6 +150,9 @@ void Fun4AllSRawEventInputManager::E906ToE1039()
   event_header->set_trigger(SQEvent::NIM5, _srawEvent->isTriggeredBy(SRawEvent::NIM5));
   event_header->set_qie_turn_id(_srawEvent->getTurnID());
   event_header->set_qie_rf_id(_srawEvent->getRFID());
+
+  //event_header->set_totalTime(_srawEvent->getTotalTime());
+  
   for(int i = -16; i < 16; ++i) event_header->set_qie_rf_intensity(i, _srawEvent->getIntensity(i));
 
   vector<Hit>& hits = _srawEvent->getAllHits();

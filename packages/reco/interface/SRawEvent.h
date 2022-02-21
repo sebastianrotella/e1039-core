@@ -228,6 +228,9 @@ public:
     ///Print for debugging purposes
     void print (std::ostream& os = std::cout) const;
 
+  double getTotalTime() { return _totalTime; }
+  void setTotalTime(double t) { _totalTime = t; }
+  
     ///Friend class which handles all kinds of hit list reduction
     friend class EventReducer;
 
@@ -273,6 +276,8 @@ private:
     std::vector<Hit> fAllHits;
     std::vector<Hit> fTriggerHits;
 
+  double _totalTime = 0;
+  
     ClassDef(SRawEvent, 9)
 };
 
