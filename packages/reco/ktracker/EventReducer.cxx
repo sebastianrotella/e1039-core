@@ -78,6 +78,8 @@ EventReducer::~EventReducer()
 
 int EventReducer::reduceEvent(SRawEvent* rawEvent)
 {
+    int evID = rawEvent->getEventID()+1; //can be used to de-randomize event reduction
+  
     int nHits_before = rawEvent->getNChamberHitsAll();
 
     //temporarily disable trigger road masking if this event is not fired by any MATRIX triggers
@@ -94,20 +96,24 @@ int EventReducer::reduceEvent(SRawEvent* rawEvent)
     {
         if(outoftime && (!iter->isInTime())) continue;
 
-        if(iter->detectorID <= nChamberPlanes)    //chamber hits
-        {
-            if(realization && rndm.Rndm() > chamEff) continue;
-            //if(hodomask && (!iter->isHodoMask())) continue;
-            //if(triggermask && (!iter->isTriggerMask())) continue;
-        }
-        else if(iter->detectorID > nChamberPlanes && iter->detectorID <= nChamberPlanes+nHodoPlanes)
-        {
-            // if trigger masking is enabled, all the X hodos are discarded
-            if(triggermask_local && p_geomSvc->getPlaneType(iter->detectorID) == 1) continue;
-        }
+	if(iter->index < 1000){ //data hits have a very high index, while simulated hits do not.  I HAVE NOT CHECKED THIS WITH OVERLAID SIMULATION
+	  //rndm.SetSeed(evID+iter->index); //uncomment to de-randomization event reduction
+	  if(iter->detectorID <= nChamberPlanes)    //chamber hits
+	    {
+	      if(realization && rndm.Rndm() > chamEff) continue;
+	      //if(hodomask && (!iter->isHodoMask())) continue;
+	      //if(triggermask && (!iter->isTriggerMask())) continue;
+	    }
+	  else if(iter->detectorID > nChamberPlanes && iter->detectorID <= nChamberPlanes+nHodoPlanes)
+	    {
+	      // if trigger masking is enabled, all the X hodos are discarded
+	      if(triggermask_local && p_geomSvc->getPlaneType(iter->detectorID) == 1) continue;
+	    }
+	  
+	  if(realization && iter->detectorID <= nChamberPlanes) iter->driftDistance += rndm.Gaus(0., chamResol);
 
-        if(realization && iter->detectorID <= nChamberPlanes) iter->driftDistance += rndm.Gaus(0., chamResol);
-
+	}
+	  
         if(iter->detectorID >= nChamberPlanes+1 && iter->detectorID <= nChamberPlanes+nHodoPlanes)
         {
             hodohitlist.push_back(*iter);
