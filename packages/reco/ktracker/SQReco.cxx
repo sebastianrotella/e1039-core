@@ -1,8 +1,8 @@
 #include "SQReco.h"
 
 #include "KalmanFastTracking.h"
-#include "KalmanFastTracking_NEW.h"
 #include "KalmanFastTracking_NEW_2.h"
+#include "KalmanFastTracking_OLD.h"
 #include "EventReducer.h"
 #include "UtilSRawEvent.h"
 
@@ -117,8 +117,8 @@ int SQReco::InitRun(PHCompositeNode* topNode)
 
   //Init track finding
   //_fastfinder = new KalmanFastTracking(_phfield, _t_geo_manager, false);
-  //_fastfinder = new KalmanFastTracking_NEW(_phfield, _t_geo_manager, false);
-  _fastfinder = new KalmanFastTracking_NEW_2(_phfield, _t_geo_manager, false);
+  _fastfinder = new KalmanFastTracking_OLD(_phfield, _t_geo_manager, false);
+  //_fastfinder = new KalmanFastTracking_NEW_2(_phfield, _t_geo_manager, false);
 
   _fastfinder->Verbosity(Verbosity());
 
@@ -352,6 +352,13 @@ int SQReco::process_event(PHCompositeNode* topNode)
   }
   //if(Verbosity() >= Fun4AllBase::VERBOSITY_A_LOT) _fastfinder->printTimers(); //WPM
   _fastfinder->printTimers(); //WPM
+
+  _totalTime = _fastfinder->getTotalTime();
+  //_rawEvent->setTotalTime(_totalTime);
+
+  //_event_header->set_totalTime(_totalTime);
+
+  if(Verbosity() >= Fun4AllBase::VERBOSITY_A_LOT) LogInfo("TOTAL TIME is: "<<_totalTime);
   
   int nTracklets = 0;
   int nFittedTracks = 0;
