@@ -85,7 +85,7 @@ namespace
 
   static double KMAGSTR;
   static double PT_KICK_KMAG;
-  
+
     //initialize global variables
     void initGlobalVariables()
     {
@@ -1220,11 +1220,13 @@ void KalmanFastTracking::buildBackPartialTracksSlim()
 	    /*
             if(!COARSE_MODE && !hodoMask(tracklet_23))
             {
+
 #ifdef _DEBUG_ON
                 LogInfo("Hodomasking failed!");
 #endif
                 continue;
             }
+
 #ifdef _DEBUG_ON
             LogInfo("Hodomasking Scucess!");
 #endif
@@ -1238,6 +1240,7 @@ void KalmanFastTracking::buildBackPartialTracksSlim()
             ///Remove bad hits if needed
             removeBadHits(tracklet_23);
 
+
 #ifdef _DEBUG_ON
             LogInfo("New tracklet: ");
             tracklet_23.print();
@@ -1248,10 +1251,12 @@ void KalmanFastTracking::buildBackPartialTracksSlim()
             LogInfo("Comparison: " << (tracklet_23 < tracklet_best_UX));
 	    LogInfo("Candidate chisq: " << tracklet_23.chisq);
             LogInfo("Quality: " << acceptTracklet(tracklet_23));
+
 #endif
 
             //If current tracklet is better than the best tracklet up-to-now
             if(acceptTracklet(tracklet_23) && tracklet_23 < tracklet_best_UX)
+
             {
                 tracklet_best_UX = tracklet_23;
             }
@@ -3833,6 +3838,7 @@ bool KalmanFastTracking::acceptTracklet(Tracklet& tracklet)
       }
     }*/ //WPM
 
+
 #ifdef _DEBUG_ON
         LogInfo("Made it through various checks");
 #endif
@@ -3882,6 +3888,7 @@ bool KalmanFastTracking::hodoMask(Tracklet& tracklet)
   }
 
   if(tracklet.stationID > 5){
+
     for(std::vector<int>::iterator stationID = stationIDs_mask[tracklet.stationID-1].begin(); stationID != stationIDs_mask[tracklet.stationID-1].end(); ++stationID)
     {
         bool masked = false;

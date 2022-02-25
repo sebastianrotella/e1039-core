@@ -750,6 +750,7 @@ int Tracklet::getCharge() const
   }
 }
 
+// set charge of the tracklet.
 void Tracklet::setCharge(int chrg)
 {
   _chargeSet = true;

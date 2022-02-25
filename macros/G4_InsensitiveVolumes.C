@@ -29,7 +29,8 @@ void SetupInsensitiveVolumes(
   const bool toggle_absorber = true,
   const int enable_fmag_filter = 0,      /*should set this to 1 after being extensively tested*/
   const double filter_max_slope = 0.25,
-  const double filter_min_energy = 5.)
+  const double filter_min_energy = 5.,
+  const bool toggle_shielding_afterFMag = true)
 {
   if(toggle_shielding) {
     const double inch = 2.54;
@@ -72,7 +73,10 @@ void SetupInsensitiveVolumes(
     g4Reco->registerSubsystem(shielding);
   }
 
-  if(false) { // false by default at present.  Change to true manually when necessary
+  if(toggle_shielding_afterFMag) { 
+    // concrete between fmag and true by default at present.  
+    // Change to true manually when necessary
+    // recently added: need to validate
     const double inch = 2.54;
     PHG4BlockSubsystem* shielding_behind_fmag = new PHG4BlockSubsystem("ShieldingBehindFmag", 0);
     shielding_behind_fmag->set_double_param("place_x",   0.0); // Place and size are preliminary.  See DocDB 9732

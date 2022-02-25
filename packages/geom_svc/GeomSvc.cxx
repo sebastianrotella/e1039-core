@@ -202,7 +202,6 @@ std::ostream& operator << (std::ostream& os, const Plane& plane)
         os << "\n";
         for(int i=0; i<9; ++i) os << std::setw(10) << std::setiosflags(std::ios::right) << plane.deltaW_module[i];
     }
-
     return os;
 }
 
@@ -420,7 +419,9 @@ void GeomSvc::initPlaneDbSvc() {
   using namespace std;
   recoConsts* rc = recoConsts::instance();
   int run = rc->get_IntFlag("RUNNUMBER");
-  cout << "GeomSvc:  Load the plane geometry info for run = " << run << "." << endl;
+#ifdef _DEBUG_ON
+    cout << "GeomSvc:  Load the plane geometry info via DbSvc for run = " << run << "." << endl;
+#endif
 
   GeomParamPlane* geom = new GeomParamPlane();
   geom->SetMapIDbyDB(run);
@@ -928,7 +929,9 @@ void GeomSvc::loadAlignment(const std::string& alignmentFile_chamber, const std:
             planes[i+1].resolution = resol;
         }
 
-        cout << "GeomSvc: loaded chamber alignment parameters from " << alignmentFile_chamber << endl;
+#ifdef _DEBUG_ON
+	  cout << "GeomSvc: loaded chamber alignment parameters from " << alignmentFile_chamber << endl;
+#endif
     }
     _align_chamber.close();
 
@@ -948,11 +951,13 @@ void GeomSvc::loadAlignment(const std::string& alignmentFile_chamber, const std:
             planes[i].deltaY = planes[i].deltaW*planes[i].sintheta;
             planes[i].update();
         }
-        cout << "GeomSvc: loaded hodoscope alignment parameters from " << alignmentFile_hodo << endl;
+#ifdef _DEBUG_ON
+	  cout << "GeomSvc: loaded hodoscope alignment parameters from " << alignmentFile_hodo << endl;
+#endif
     }
     else
     {
-        cout << "GeomSvc: failed to load hodoscope alignment parameters from " << alignmentFile_hodo << endl;
+      cout << "GeomSvc: failed to load hodoscope alignment parameters from " << alignmentFile_hodo << endl;
     }
     _align_hodo.close();
 
@@ -986,7 +991,9 @@ void GeomSvc::loadAlignment(const std::string& alignmentFile_chamber, const std:
             planes[i+1].deltaX = planes[i+1].deltaW*planes[i+1].costheta;
             planes[i+1].deltaY = planes[i+1].deltaW*planes[i+1].sintheta;
         }
-        cout << "GeomSvc: loaded prop. tube alignment parameters from " << alignmentFile_prop << endl;
+#ifdef _DEBUG_ON
+	  cout << "GeomSvc: loaded prop. tube alignment parameters from " << alignmentFile_prop << endl;
+#endif
     }
     else
     {
@@ -1018,7 +1025,9 @@ void GeomSvc::loadMilleAlignment(const std::string& alignmentFile_mille)
 
             //if(planes[i].resolution < RESOLUTION_DC) planes[i].resolution = RESOLUTION_DC;
         }
-        cout << "GeomSvc: loaded millepede-based alignment parameters from " << alignmentFile_mille << endl;
+#ifdef _DEBUG_ON
+	  cout << "GeomSvc: loaded millepede-based alignment parameters from " << alignmentFile_mille << endl;
+#endif
 
         for(int i = 1; i <= nChamberPlanes; i+=2)
         {
@@ -1067,7 +1076,9 @@ void GeomSvc::loadCalibration(const std::string& calibrationFile)
             if(planes[detectorID].rtprofile != NULL) delete planes[detectorID].rtprofile;
             if(nBin > 0) planes[detectorID].rtprofile = new TSpline3(getDetectorName(detectorID).c_str(), T, R, nBin, "b1e1");
         }
-        cout << "GeomSvc: loaded calibration parameters from " << calibrationFile << endl;
+#ifdef _DEBUG_ON
+	  cout << "GeomSvc: loaded calibration parameters from " << calibrationFile << endl;
+#endif
     }
     _cali_file.close();
 }
