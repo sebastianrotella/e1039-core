@@ -474,13 +474,17 @@ int KalmanFastTracking_NEW_2::setRawEvent(SRawEvent* event_input)
 #ifdef _DEBUG_ON
     for(std::vector<Hit>::iterator iter = hitAll.begin(); iter != hitAll.end(); ++iter) iter->print();
 #endif
-
+    
     //Initialize hodo and masking IDs
     for(int i = 0; i < 4; i++)
     {
         //std::cout << "For station " << i << std::endl;
         hitIDs_mask[i].clear();
-        if(MC_MODE || COSMIC_MODE || rawEvent->isFPGATriggered())
+	hitIDs_mask[i] = rawEvent->getHitsIndexInDetectorsNoRepeats(detectorIDs_mask[i]); //WPM Feb 16
+        hitIDs_maskX[i].clear();
+        hitIDs_maskX[i] = rawEvent->getHitsIndexInDetectorsNoRepeats(detectorIDs_maskX[i]); //WPM Feb 16
+	/*
+	if(MC_MODE || COSMIC_MODE || rawEvent->isFPGATriggered())
         {
             hitIDs_mask[i] = rawEvent->getHitsIndexInDetectors(detectorIDs_maskX[i]);
         }
@@ -488,7 +492,7 @@ int KalmanFastTracking_NEW_2::setRawEvent(SRawEvent* event_input)
         {
             hitIDs_mask[i] = rawEvent->getHitsIndexInDetectors(detectorIDs_maskY[i]);
         }
-
+	*/
         //for(std::list<int>::iterator iter = hitIDs_mask[i].begin(); iter != hitIDs_mask[i].end(); ++iter) std::cout << *iter << " " << hitAll[*iter].detectorID << " === ";
         //std::cout << std::endl;
     }
@@ -1371,13 +1375,24 @@ void KalmanFastTracking_NEW_2::buildGlobalTracksDisplaced()
         {
 
 	  bool validTrackFound = false; //WPM
-	  int pxSlices[8] = {1, 3, 5, 7, 9, 11, 13, 15}; //This is another scan outward from a linear extrapolation from station 2+3.  We don't know the momentum or charge at this point!  The range here does limit the pz range that you can find to some extent, but I can get below 10 GeV with this range
-	  for(int pxs = 0; pxs < 8; pxs++){ //WPM
+	  int pxSlices[23] = {1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29, 31, 33, 35, 37, 39, 41, 43, 45}; //This is another scan outward from a linear extrapolation from station 2+3.  We don't know the momentum or charge at this point!  The range here does limit the pz range that you can find to some extent, but I can get below 10 GeV with this range
+	  for(int pxs = 0; pxs < 23; pxs++){ //WPM
 	    if(validTrackFound) continue; //WPM potentially controversial.  Trying to get out of px window loop
 	    
 	    int charges[2] = {-1,1}; //WPM
 	    for(int ch = 0; ch < 2; ch++){ //WPM
 	      
+	      bool hodoFound = false;
+              for(std::list<int>::iterator iter = hitIDs_maskX[0].begin(); iter != hitIDs_maskX[0].end(); ++iter){
+#ifdef _DEBUG_HODO_ST1
+                LogInfo("hodo hit pos = "<<hitAll[*iter].pos<<" exp hodo pos ="<<((*tracklet23).tx - 0.002 * charges[ch]*pxSlices[pxs])*(p_geomSvc->getPlanePosition(hitAll[*iter].detectorID) - z_plane[3]) + posx+charges[ch]*pxSlices[pxs]<<" diff = "<<std::abs( hitAll[*iter].pos - (((*tracklet23).tx - 0.002 * charges[ch]*pxSlices[pxs])*(p_geomSvc->getPlanePosition(hitAll[*iter].detectorID) - z_plane[3]) + posx+charges[ch]*pxSlices[pxs]) ));
+#endif
+                if( std::abs( hitAll[*iter].pos - (((*tracklet23).tx - 0.002 * charges[ch]*pxSlices[pxs])*(p_geomSvc->getPlanePosition(hitAll[*iter].detectorID) - z_plane[3]) + posx+charges[ch]*pxSlices[pxs]) ) < 5. ){
+                  hodoFound = true;
+                }
+              }
+	      
+              if(!hodoFound) continue;
 	      if(validTrackFound) continue; //WPM potentially controversial.  Trying to get out of px window loop.  Finding higher pz tracks takes less time
 	      
 	      trackletsInStSlimX[0][0].clear();

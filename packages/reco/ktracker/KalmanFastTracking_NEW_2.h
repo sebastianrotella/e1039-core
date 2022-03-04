@@ -221,6 +221,7 @@ private:
     std::vector<int> detectorIDs_maskX[4];
     std::vector<int> detectorIDs_maskY[4];
     std::list<int>   hitIDs_mask[4];              //hits in T/B, L/R are combined
+    std::list<int>   hitIDs_maskX[4];
     std::vector<int> detectorIDs_muidHodoAid[2];  //Aux-hodoscope masking for muon ID
 
     //register difference hodo masking stations for different chamber detectors
