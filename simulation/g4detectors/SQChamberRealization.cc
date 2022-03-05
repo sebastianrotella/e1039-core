@@ -63,35 +63,42 @@ int SQChamberRealization::process_event(PHCompositeNode* topNode)
   SQHitVector::Iter it = m_hit_vec->begin();
   while (it != m_hit_vec->end()) {
     SQHit* hit = *it;
-    int    det_id   = hit->get_detector_id();
-    string det_name = GeomSvc::instance()->getDetectorName(det_id);
+    int det_id = hit->get_detector_id();
+    PlaneParam* param = &list_param[det_id];
+    if (! param->on) {
+      it++;
+      continue;
+    }
 
-    bool is_eff = true;
-    //std::cout<<"test det_name: "<<det_name.substr(0, 3)<<std::endl; //WPM
-    if      (det_name.substr(0, 2) == "D0" ) is_eff = (gRandom->Rndm() < m_eff_d0 );
-    else if (det_name.substr(0, 2) == "D1" ) is_eff = (gRandom->Rndm() < m_eff_d1 );
-    else if (det_name.substr(0, 2) == "D2" ) is_eff = (gRandom->Rndm() < m_eff_d2 );
-    else if (det_name.substr(0, 3) == "D3p") is_eff = (gRandom->Rndm() < m_eff_d3p);
-    else if (det_name.substr(0, 3) == "D3m") is_eff = (gRandom->Rndm() < m_eff_d3m);
-    else if (det_name.substr(0, 3) == "P1X") is_eff = (gRandom->Rndm() < m_eff_p1x);
-    else if (det_name.substr(0, 3) == "P1Y") is_eff = (gRandom->Rndm() < m_eff_p1y);
-    else if (det_name.substr(0, 3) == "P2X") is_eff = (gRandom->Rndm() < m_eff_p2x);
-    else if (det_name.substr(0, 3) == "P2Y") is_eff = (gRandom->Rndm() < m_eff_p2y);
-    //std::cout<<"what is is_eff? "<<is_eff<<std::endl; //WPM
-    hit->set_in_time(is_eff); // Temporary solution!!
+    int  ele_id = hit->get_element_id();
+    bool is_eff = (gRandom->Rndm() < param->eff);
+    if (Verbosity() >= 2) {
+      string det_name = GeomSvc::instance()->getDetectorName(det_id);
+      cout << "  Hit: det=" << det_id << ":" << det_name << " ele=" << ele_id << " is_eff=" << is_eff << endl;
+    }
+    if (! is_eff) {
+      it = m_hit_vec->erase(it);
+      continue;
+    }
 
-    TGraphErrors* gr_x2t;
-    TGraphErrors* gr_x2dt;
-    if (m_cal_xt->FindX2T(det_id, gr_x2t, gr_x2dt)) {
-      int    ele_id  = hit->get_element_id();
-      double dist    = hit->get_drift_distance();
-      double mean_t  = gr_x2t ->Eval(fabs(dist));
-      double width_t = gr_x2dt->Eval(fabs(dist));
-      double drift_time = -1;
-      for (int i_try = 0; i_try < 10000; i_try++) {
-        drift_time = gRandom->Gaus(mean_t, width_t);
-        if (drift_time >= 0) break;
+    CalibParamXT::Set* xt = m_cal_xt->GetParam(det_id);
+    if (xt) {
+      double dist = hit->get_drift_distance();
+      int dist_sign = dist > 0  ?  +1  :  -1;
+      dist *= dist_sign; // Made positive.
 
+      double dx;
+      if (param->reso_fixed >= 0) dx  = param->reso_fixed;
+      else                        dx  = xt->x2dx.Eval(dist);
+      if (param->reso_scale >= 0) dx *= param->reso_scale;
+      if (Verbosity() >= 2) cout << "       dist=" << dist << " dx=" << dx << " X0=" << xt->X0 << " X1=" << xt->X1 << endl;
+
+      double dist_new;
+      int n_try = 10000;
+      while (n_try > 0) {
+        dist_new = gRandom->Gaus(dist, dx);
+        if (xt->X0 <= dist_new && dist_new <= xt->X1) break;
+        n_try--;
       }
       if (n_try == 0) {
         cout << PHWHERE << " Failed at generating an in-range drift time.  Something unexpected.  Abort." << endl;

@@ -75,14 +75,9 @@ int CalibDriftDist::process_event(PHCompositeNode* topNode)
     int det = hit->get_detector_id();
     if (!geom->isChamber(det) && !geom->isPropTube(det)) continue;
 
-    int ele = hit->get_element_id();
-    TGraphErrors* gr_t2x;
-    TGraphErrors* gr_t2dx;
-    double center, width;
-    if (! m_cal_xt ->Find(det, gr_t2x, gr_t2dx) || 
-        ! m_cal_int->Find(det, ele, center, width) ) {
-      cerr << "  WARNING:  Cannot find the in-time parameter for det=" << det << " ele=" << ele << " in CalibDriftDist.\n";
-
+    CalibParamXT::Set* xt = m_cal_xt->GetParam(det);
+    if (! det) {
+      cerr << "  WARNING:  Cannot find the in-time parameter for det=" << det << " in CalibDriftDist.\n";
       continue;
       //return Fun4AllReturnCodes::ABORTEVENT;
     }
@@ -95,7 +90,6 @@ int CalibDriftDist::process_event(PHCompositeNode* topNode)
 
     int ele = hit->get_element_id();
     hit->set_pos(geom->getMeasurement(det, ele));
-    std::cout<<"still still in CalibDriftDist process_event.  index = "<<hit->get_hit_id()<<", detID = "<<hit->get_detector_id()<<", elementID = "<<hit->get_element_id()<<", tdcTime = "<<hit->get_tdc_time()<<", driftDistance = "<<fabs(hit->get_drift_distance())<<", pos = "<<hit->get_pos()<<", is_in_time = "<<hit->is_in_time()<<", get_tdc_time = "<<hit->get_tdc_time()<<", t1 = "<<t1<<", t0 = "<<t0<<std::endl; //WPM
   }
   return Fun4AllReturnCodes::EVENT_OK;
 }

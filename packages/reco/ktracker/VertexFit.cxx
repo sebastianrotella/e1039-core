@@ -330,9 +330,9 @@ int VertexFit::setRecEvent(SRecEvent* recEvent, int sign1, int sign2)
               std::cout << "posSt1 " << posSt1.X() << " Y " << posSt1.Y() << " Z " << posSt1.Z() << std::endl;
 #endif
           } 
-          addHypothesis(0.5*(dimuon.vtx_pos[0] + dimuon.vtx_neg[0]), 0.5*(dimuon.vtx_pos[1] + dimuon.vtx_neg[1]), 0.5*(dimuon.vtx_pos[2] + dimuon.vtx_neg[2]), 10.0, 10.0, 50.);
+          //addHypothesis(0.5*(dimuon.vtx_pos[0] + dimuon.vtx_neg[0]), 0.5*(dimuon.vtx_pos[1] + dimuon.vtx_neg[1]), 0.5*(dimuon.vtx_pos[2] + dimuon.vtx_neg[2]), 10.0, 10.0, 50.); //WPM
           TVector3 posCand = findDimuonVertexFast(track_pos, track_neg);
-          addHypothesis(posCand.X(), posCand.Y(), posCand.Z(),  10.0, 10.0, 50.);
+          //addHypothesis(posCand.X(), posCand.Y(), posCand.Z(),  10.0, 10.0, 50.); //WPM
 
           choice_eval = processOnePair();
 
