@@ -141,7 +141,7 @@ public:
 
     ///Tool, a simple-minded chi square fit
     void chi2fit(int n, double x[], double y[], double& a, double& b);
-
+  
 private:
     //verbosity following Fun4All convention
     int verbosity;

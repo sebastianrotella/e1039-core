@@ -41,6 +41,7 @@ Created: 05-28-2013
 //#define _DEBUG_GCLEAN
 //#define _DEBUG_MATCH
 //#define _DEBUG_MATCH_2
+#define _DEBUG_CLEAN
 //#define _DEBUG_STRACKS
 
 //#define _DEBUG_GLOBAL
@@ -155,7 +156,6 @@ namespace
 
 	    KMAGSTR = rc->get_DoubleFlag("KMAGSTR");
 	    PT_KICK_KMAG = rc->get_DoubleFlag("PT_KICK_KMAG")*KMAGSTR;
-        }
     }
 }
 
@@ -899,6 +899,16 @@ int KalmanFastTracking_NEW_HODO_2::setRawEvent(SRawEvent* event_input)
       }
     }
 
+    for(std::list<Tracklet>::iterator trackletG = trackletsInSt[4].begin(); trackletG != trackletsInSt[4].end(); ++trackletG)
+    {
+      removeBadHits((*trackletG));
+      //SQGenFit::GFTrack gftrk; //WPM Mar 7 
+      //gftrk.setTracklet((*trackletG)); //WPM Mar 7 
+      //int fitOK = _gfitter->processTrack(gftrk); //WPM Mar 7
+      //std::cout<<"fitOK = "<<fitOK<<std::endl; //WPM Mar 7 
+    }
+
+    
     reduceTrackletList(trackletsInSt[4]);
     
     _timers["global"]->stop();
@@ -3842,6 +3852,11 @@ void KalmanFastTracking_NEW_HODO_2::removeBadHits(Tracklet& tracklet)
     tracklet.calcChisq();
     tracklet.print();
 #endif
+#ifdef _DEBUG_CLEAN
+    LogInfo("Removing hits for this track..");
+    tracklet.calcChisq();
+    tracklet.print();
+#endif
 
     //Check if the track has beed updated
     int signflipflag[nChamberPlanes];
@@ -3884,6 +3899,11 @@ void KalmanFastTracking_NEW_HODO_2::removeBadHits(Tracklet& tracklet)
             hit_remove->hit.print();
             hit_neighbour->hit.print();
 #endif
+#ifdef _DEBUG_CLEAN
+            LogInfo("Dropping this hit: " << res_remove1 << "  " << res_remove2 << "   " << signflipflag[hit_remove->hit.detectorID-1] << "  " << cut);
+            hit_remove->hit.print();
+            hit_neighbour->hit.print();
+#endif
 
             //can only be changed less than twice
             if(res_remove2 < cut && signflipflag[hit_remove->hit.detectorID-1] < 2)
@@ -3892,6 +3912,9 @@ void KalmanFastTracking_NEW_HODO_2::removeBadHits(Tracklet& tracklet)
                 hit_neighbour->sign = 0;
                 ++signflipflag[hit_remove->hit.detectorID-1];
 #ifdef _DEBUG_ON
+                LogInfo("Only changing the sign.");
+#endif
+#ifdef _DEBUG_CLEAN
                 LogInfo("Only changing the sign.");
 #endif
             }
@@ -3919,6 +3942,9 @@ void KalmanFastTracking_NEW_HODO_2::removeBadHits(Tracklet& tracklet)
                 if(hit_neighbour->hit.index < 0)
                 {
 #ifdef _DEBUG_ON
+                    LogInfo("Both hits in a view are missing! Will exit the bad hit removal...");
+#endif
+#ifdef _DEBUG_CLEAN
                     LogInfo("Both hits in a view are missing! Will exit the bad hit removal...");
 #endif
                     return;
