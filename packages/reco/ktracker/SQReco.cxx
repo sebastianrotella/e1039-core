@@ -47,6 +47,10 @@
 #include <algorithm>
 #include <vector>
 
+#include "lwtnn/LightweightGraph.hh"
+#include "lwtnn/parse_json.hh"
+#include "lwtnn/Exceptions.hh"
+
 //#define _DEBUG_ON
 
 #ifdef _DEBUG_ON
@@ -101,6 +105,9 @@ SQReco::~SQReco()
 
 int SQReco::Init(PHCompositeNode* topNode) 
 {
+  std::ifstream pidNNInput("/work/submit/srotella/DQ/e1039-core/packages/reco/ktracker/neural_net.json");
+  lwt::GraphConfig TrackGraphConfig = lwt::parse_json_graph(pidNNInput);
+  _PIDGraph = new lwt::LightweightGraph(TrackGraphConfig);
   return Fun4AllReturnCodes::EVENT_OK;
 }
 
@@ -600,14 +607,26 @@ void SQReco::ParticleID(){
     Double_t track_x_CAL = track_x_st3 + (track_px_st3 / track_pz_st3) * (1930. - track_z_st3);
     Double_t track_y_CAL = track_y_st3 + (track_py_st3 / track_pz_st3) * (1930. - track_z_st3);
 
-    std::cout<< "track_x_CAL: " << track_x_CAL << std::endl;
-    std::cout<< "track_y_CAL: " << track_y_CAL << std::endl;
+    Double_t track_x_det45 = track_x_st3 + (track_px_st3 / track_pz_st3) * (2251.71 - track_z_st3);
+    Double_t track_x_det46 = track_x_st3 + (track_px_st3 / track_pz_st3) * (2234.29 - track_z_st3);
+
+    Double_t track_y_det41 = track_y_st3 + (track_py_st3 / track_pz_st3) * (2130.27 - track_z_st3);
+    Double_t track_y_det42 = track_y_st3 + (track_py_st3 / track_pz_st3) * (2146.45 - track_z_st3);
+    Double_t track_y_det43 = track_y_st3 + (track_py_st3 / track_pz_st3) * (2200.44 - track_z_st3);
+    Double_t track_y_det44 = track_y_st3 + (track_py_st3 / track_pz_st3) * (2216.62 - track_z_st3);
+    
+
+    //std::cout<< "track_x_CAL: " << track_x_CAL << std::endl;
+    //std::cout<< "track_y_CAL: " << track_y_CAL << std::endl;
 
     //Loop over hit vector to determine the energy
     Double_t ClusterEnergy = 0.;
+    int  H4_hits = 0;
 
     for (int ihit = 0; ihit < _hit_vector->size(); ++ihit) {
       SQHit* hit = _hit_vector->at(ihit);
+
+      //std::cout<<"Expected Hit Position: "<<hit->get_pos()<<std::endl;
 
       if (hit->get_detector_id() == 100){ //100 is EMCAL ID
 
@@ -626,15 +645,84 @@ void SQReco::ParticleID(){
           ClusterEnergy += hit_e;
         }
       }
+      if (hit->get_detector_id() == 41){
+	if ((std::abs(hit->get_pos() - track_y_det41) <= 20)){
+	  H4_hits += 1;
+	}
+      }
+      if (hit->get_detector_id() == 42){
+        if ((std::abs(hit->get_pos() - track_y_det42) <= 20)){
+          H4_hits += 1;
+	}
+      }
+      if (hit->get_detector_id() == 43){
+        if ((std::abs(hit->get_pos() - track_y_det43) <= 20)){
+          H4_hits += 1;
+	}
+      }
+      if (hit->get_detector_id() == 44){
+        if ((std::abs(hit->get_pos() - track_y_det44) <= 20)){
+          H4_hits += 1;
+	}
+      }
+      if (hit->get_detector_id() == 45){
+        if ((std::abs(hit->get_pos() - track_x_det45) <= 20)){
+          H4_hits += 1;
+	}
+      }
+      if (hit->get_detector_id() == 46){
+        if ((std::abs(hit->get_pos() - track_x_det46) <= 20)){
+          H4_hits += 1;
+	}
+      }
     }
     Double_t E_p_ratio = (ClusterEnergy/sfc)/track_pz_st3;
 
+    // NN Inputs
+    std::map<std::string, std::map<std::string, double>> NN_inputs;
+    NN_inputs["node_0"] = {{"variable_0",E_p_ratio}};
+    NN_inputs["node_0"].insert({"variable_1",H4_hits});
+    NN_inputs["node_0"].insert({"variable_2",track_x_det46});
+    NN_inputs["node_0"].insert({"variable_3",track_y_det41});
+    NN_inputs["node_0"].insert({"variable_4",track_x_CAL});
+    NN_inputs["node_0"].insert({"variable_5",track_y_CAL});
+    NN_inputs["node_0"].insert({"variable_6",track_pz_st3});
+    NN_inputs["node_0"].insert({"variable_7",track_px_st3});
+    NN_inputs["node_0"].insert({"variable_8",track_py_st3});
+
+    
+    //std::cout<<"Number of H4 Hits = "<<H4_hits<<std::endl;
+    std::map<std::string, double> result = _PIDGraph->compute(NN_inputs);
+
+    float NNscore0 = float(result["out_0"]);
+    float NNscore1 = float(result["out_1"]);
+    float NNscore2 = float(result["out_2"]);
+    
+    //std::cout<<"PID NN1  is " << NNscore0<< std::endl;
+    //std::cout<<"PID NN2  is " << NNscore1<< std::endl;
+    //std::cout<<"PID NN3  is " << NNscore2<< std::endl;
+
+    float m = std::max({NNscore0,NNscore1,NNscore2});
+
+    // Set particle ID
+    if (NNscore0 == m){
+      recTrack->set_particleID(11);
+    }
+    else if (NNscore1 ==m){
+      recTrack->set_particleID(13);
+    }
+    else{
+      recTrack->set_particleID(211);
+    }
+    
+    /*
     if ((E_p_ratio <= 1.8) && (E_p_ratio >= 0.9)){
       recTrack->set_particleID(11);
     }
     else{
       recTrack->set_particleID(13);
     }
+    */
   }
 }
 
@@ -775,20 +863,19 @@ bool SQReco::fitTrackCand(Tracklet& tracklet, SQGenFit::GFFitter* fitter)
   strack.setNHitsInPT(tracklet.seg_x.getNHits(), tracklet.seg_y.getNHits());
   strack.setPTSlope(tracklet.seg_x.a, tracklet.seg_y.a);
 
-  std::cout<<"where am i? "<<tracklet.vtxHypos.size()<<std::endl;
   if(tracklet.vtxHypos.size()>0){
     //strack.setVtxHypos(tracklet.vtxHypos);
     for(unsigned int h = 0; h < tracklet.vtxHypos.size(); h++){
-      std::cout<<tracklet.vtxHypos.at(h)<<std::endl;
+      //std::cout<<tracklet.vtxHypos.at(h)<<std::endl;
       //strack.trackletVtxHypos.push_back(tracklet.vtxHypos.at(h));
     }
   }
   
   LogDebug("turns out i'm dong gfitting?  about to fill rectrack.  chisq = "<<strack.getChisq());
-  std::cout<<"pushback"<<std::endl;
+  //std::cout<<"pushback"<<std::endl;
   temporarySTracks.push_back(strack);
   //fillRecTrack(strack);
-  std::cout<<"pushedback"<<std::endl;
+  //std::cout<<"pushedback"<<std::endl;
   
   return true;
 }

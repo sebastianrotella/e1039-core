@@ -17,6 +17,8 @@
 
 #include "GFFitter.h"
 
+#include "lwtnn/LightweightGraph.hh"
+
 class PHField;
 
 class Tracklet;
@@ -162,6 +164,7 @@ private:
   TGeoManager* _t_geo_manager;
 
   std::vector<SRecTrack> temporarySTracks;
+  lwt::LightweightGraph* _PIDGraph;
 };
 
 #endif

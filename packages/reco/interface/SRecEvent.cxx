@@ -350,6 +350,9 @@ TLorentzVector SRecTrack::getMomentumVertex()
     else if (part_id == 11){
         part_mass = 0.000510998; //electron
     }
+    else if (part_id == 211){
+        part_mass = 0.13957039; // charged pion
+    }
 
     Double_t px, py, pz, E;
 

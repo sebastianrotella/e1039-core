@@ -49,7 +49,7 @@ foreach(LinkDefh ${LinkDefhs})
 	string(REPLACE "LinkDef.h" "_Dict.C" DictC ${LinkDefh})
 	string(REPLACE "${PROJECT_SOURCE_DIR}/" "" DictC ${DictC})
 	list(APPEND dicts ${DictC})
-	add_custom_command(OUTPUT ${DictC} COMMAND rootcint ARGS -f ${DictC} -noIncludePaths -inlineInputHeader -c -p -I${PROJECT_SOURCE_DIR} -I${PROJECT_SOURCE_DIR}/../interface -I${PROJECT_SOURCE_DIR}/../SQGenFit -I${PROJECT_SOURCE_DIR}/../kfitter -I${GEANT4_PREFIX}/include/Geant4 ${Dicth} ${LinkDefh})
+	add_custom_command(OUTPUT ${DictC} COMMAND rootcint ARGS -f ${DictC} -noIncludePaths -inlineInputHeader -c -p -I${PROJECT_SOURCE_DIR} -I${PROJECT_SOURCE_DIR}/../interface -I${PROJECT_SOURCE_DIR}/../SQGenFit -I${PROJECT_SOURCE_DIR}/../lwtnn/include/lwtnn -I${PROJECT_SOURCE_DIR}/../kfitter -I${GEANT4_PREFIX}/include/Geant4 ${Dicth} ${LinkDefh})
 endforeach(LinkDefh)
 
 # source code
@@ -57,13 +57,14 @@ include_directories("${PROJECT_SOURCE_DIR}/")
 include_directories("${PROJECT_SOURCE_DIR}/../interface")
 include_directories("${PROJECT_SOURCE_DIR}/../kfitter")
 include_directories("${PROJECT_SOURCE_DIR}/../SQGenFit")
+include_directories("${PROJECT_SOURCE_DIR}/../lwtnn/include/lwtnn")
 file(GLOB sources ${PROJECT_SOURCE_DIR}/*.cxx)
 file(GLOB headers ${PROJECT_SOURCE_DIR}/*.h)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${GEANT4_CFLAGS} ${ROOT_CFLAGS} -std=c++11")
 set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -lphool")
 add_library(ktracker SHARED ${sources} ${dicts})
-target_link_libraries(ktracker -lktracker_interface -lkfitter -lgenfit2 -lsqgenfit -lphfield -lphgeom -linterface_main -lfun4all -lgeom_svc -lphg4hit ${ROOT_LINK})
+target_link_libraries(ktracker -lktracker_interface -lkfitter -lgenfit2 -lsqgenfit -llwtnn -lphfield -lphgeom -linterface_main -lfun4all -lgeom_svc -lphg4hit ${ROOT_LINK})
 
 message(STATUS ${PROJECT_SOURCE_DIR} " will be installed to " ${CMAKE_INSTALL_PREFIX})
 
